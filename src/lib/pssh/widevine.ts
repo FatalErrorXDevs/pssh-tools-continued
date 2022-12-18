@@ -5,7 +5,7 @@ import * as T from '../types';
 import * as tools from './tools'
 
 interface WidevineProtoPayload {
-  algorithm: number,
+  algorithm?: number,
   keyId?: Buffer[],
   contentId?: Buffer,
   trackType?: string,
@@ -18,12 +18,10 @@ const getPsshData = (request: T.WidevineDataEncodeConfig) => {
   const root = protobuf.loadSync(protoFile)
 
   const WidevineCencHeader = root.lookupType('proto.WidevineCencHeader')
-  const payload: WidevineProtoPayload = {
-    algorithm: 1 // 0: Unencrypted - 1: AESCTR
-  }
+  const payload: WidevineProtoPayload = {};
   if (request.keyIds && request.keyIds.length > 0) {
     const keyIdsBuffer = request.keyIds.map((key) => {
-      return Buffer.from(key, 'hex')
+      return Buffer.from(key.replaceAll('-', ''), 'hex')
     })
     payload.keyId = keyIdsBuffer
   }
@@ -38,6 +36,8 @@ const getPsshData = (request: T.WidevineDataEncodeConfig) => {
   }
   if (request.protectionScheme) {
     payload.protectionScheme = Buffer.from(request.protectionScheme).readInt32BE(0)
+  } else {
+    payload.algorithm = 1 // 0: Unencrypted - 1: AESCTR
   }
 
   const errMsg = WidevineCencHeader.verify(payload)
