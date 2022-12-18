@@ -21,7 +21,7 @@ const getPsshData = (request: T.WidevineDataEncodeConfig) => {
   const payload: WidevineProtoPayload = {};
   if (request.keyIds && request.keyIds.length > 0) {
     const keyIdsBuffer = request.keyIds.map((key) => {
-      return Buffer.from(key.replaceAll('-', ''), 'hex')
+      return Buffer.from(key, 'hex')
     })
     payload.keyId = keyIdsBuffer
   }
